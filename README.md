@@ -1,6 +1,8 @@
 
 # Vue 项目升级 webpack4
 
+ [查看博客](https://blog.csdn.net/xlz26296/article/details/84350881)
+
 由于 vue-cli 2 构建的项目是基于 webpack3，所以只能自己动手改动，至于升级 webpack4之后提升的编译速度以及各种插件自己去体验。
 
 ## 修改配置
