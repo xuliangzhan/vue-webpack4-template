@@ -1,9 +1,12 @@
 'use strict'
+const os = require('os')
+const path = require('path')
 const utils = require('./utils')
 const webpack = require('webpack')
 const config = require('../config')
+const pack = require('../package.json')
 const merge = require('webpack-merge')
-const path = require('path')
+const chalk = require('chalk')
 const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -12,6 +15,19 @@ const portfinder = require('portfinder')
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
+
+function getIPAdress() {
+  var interfaces = os.networkInterfaces();
+  for (var devName in interfaces) {
+    var iface = interfaces[devName];
+    for (var i = 0; i < iface.length; i++) {
+      var alias = iface[i];
+      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+        return alias.address;
+      }
+    }
+  }
+}
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -80,9 +96,10 @@ module.exports = new Promise((resolve, reject) => {
       devWebpackConfig.devServer.port = port
 
       // Add FriendlyErrorsPlugin
+      let host = ['localhost', '127.0.0.1', '0.0.0.0'].includes(devWebpackConfig.devServer.host) ? 'localhost' : devWebpackConfig.devServer.host
       devWebpackConfig.plugins.push(new FriendlyErrorsPlugin({
         compilationSuccessInfo: {
-          messages: [`Your application is running here: http://${devWebpackConfig.devServer.host}:${port}`],
+          messages: [chalk`{bold.rgb(255,255,0) [${pack.name}]} App running at:\n - Local:   {bold.cyan http://${host}:${port}${config.dev.assetsPublicPath}}\n - Network: {bold.cyan http://${getIPAdress()}:${port}${config.dev.assetsPublicPath}}\n\n Note that the development build is not optimized.\n To create a production build, run {bold.cyan npm run build}.`],
         },
         onErrors: config.dev.notifyOnErrors
         ? utils.createNotifierCallback()
